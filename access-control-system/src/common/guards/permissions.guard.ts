@@ -18,7 +18,9 @@ export class PermissionsGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private rolesService: RolesService,
-    @Optional() @Inject(PoliciesService) private policiesService?: PoliciesService,
+    @Optional()
+    @Inject(PoliciesService)
+    private policiesService?: PoliciesService,
     @Optional() @Inject(AuditService) private auditService?: AuditService,
   ) {}
 
@@ -39,7 +41,8 @@ export class PermissionsGuard implements CanActivate {
       throw new ForbiddenException('User not authenticated');
     }
 
-    const organizationId = request.headers['x-organization-id'] || request.query.organizationId;
+    const organizationId =
+      request.headers['x-organization-id'] || request.query.organizationId;
 
     // PHASE 1: RBAC Check
     const userPermissions = await this.rolesService.getUserPermissions(
@@ -78,7 +81,11 @@ export class PermissionsGuard implements CanActivate {
 
     // PHASE 2: ABAC Policy Check (if policies service is available and org is specified)
     if (this.policiesService && organizationId) {
-      const policyContext = this.buildPolicyContext(request, user, organizationId);
+      const policyContext = this.buildPolicyContext(
+        request,
+        user,
+        organizationId,
+      );
 
       for (const permission of requiredPermissions) {
         const result = await this.policiesService.evaluatePolicies(

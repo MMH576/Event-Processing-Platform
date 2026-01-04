@@ -137,7 +137,11 @@ export class AuthService {
     return user;
   }
 
-  private generateTokenResponse(user: { id: string; email: string; fullName: string | null }) {
+  private generateTokenResponse(user: {
+    id: string;
+    email: string;
+    fullName: string | null;
+  }) {
     const payload = { sub: user.id, email: user.email };
 
     return {

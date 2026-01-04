@@ -10,7 +10,11 @@ import {
   Request,
 } from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
-import { CreateOrganizationDto, UpdateOrganizationDto, AddMemberDto } from './dto';
+import {
+  CreateOrganizationDto,
+  UpdateOrganizationDto,
+  AddMemberDto,
+} from './dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OrganizationMemberGuard } from './guards/organization-member.guard';
 

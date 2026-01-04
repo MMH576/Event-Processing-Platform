@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePolicyDto, UpdatePolicyDto } from './dto';
 import { Prisma } from '@prisma/client';
@@ -174,7 +170,10 @@ export class PoliciesService {
 
     if (!permission) {
       // No permission found, default to allow (RBAC already checked)
-      return { allowed: true, reason: 'No matching permission found for policy evaluation' };
+      return {
+        allowed: true,
+        reason: 'No matching permission found for policy evaluation',
+      };
     }
 
     // Get all active policies for this permission and organization
@@ -189,7 +188,10 @@ export class PoliciesService {
 
     if (policies.length === 0) {
       // No policies defined, allow by default (RBAC already passed)
-      return { allowed: true, reason: 'No policies defined for this permission' };
+      return {
+        allowed: true,
+        reason: 'No policies defined for this permission',
+      };
     }
 
     // Evaluate each policy in priority order
@@ -286,7 +288,10 @@ export class PoliciesService {
     }
 
     // Check allowed departments
-    if (conditions.allowedDepartments && conditions.allowedDepartments.length > 0) {
+    if (
+      conditions.allowedDepartments &&
+      conditions.allowedDepartments.length > 0
+    ) {
       if (!context.userDepartment) {
         return { matches: true, reason: 'User department not specified' };
       }

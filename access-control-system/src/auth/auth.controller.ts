@@ -27,7 +27,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  async getProfile(@Request() req: any) {
+  getProfile(@Request() req: any) {
     return {
       id: req.user.id,
       email: req.user.email,
