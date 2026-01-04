@@ -27,10 +27,10 @@ export declare class JwtStrategy extends JwtStrategy_base {
             joinedAt: Date;
         })[];
     } & {
+        id: string;
         email: string;
         password: string | null;
         fullName: string | null;
-        id: string;
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
