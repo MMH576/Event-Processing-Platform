@@ -15,16 +15,16 @@ export declare class PoliciesService {
             action: string;
             id: string;
             createdAt: Date;
-            resource: string;
             description: string | null;
+            resource: string;
         };
     } & {
         organizationId: string;
         id: string;
-        createdAt: Date;
-        name: string;
         isActive: boolean;
+        createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string | null;
         permissionId: string;
         conditions: Prisma.JsonValue;
@@ -41,16 +41,16 @@ export declare class PoliciesService {
             action: string;
             id: string;
             createdAt: Date;
-            resource: string;
             description: string | null;
+            resource: string;
         };
     } & {
         organizationId: string;
         id: string;
-        createdAt: Date;
-        name: string;
         isActive: boolean;
+        createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string | null;
         permissionId: string;
         conditions: Prisma.JsonValue;
@@ -67,16 +67,16 @@ export declare class PoliciesService {
             action: string;
             id: string;
             createdAt: Date;
-            resource: string;
             description: string | null;
+            resource: string;
         };
     } & {
         organizationId: string;
         id: string;
-        createdAt: Date;
-        name: string;
         isActive: boolean;
+        createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string | null;
         permissionId: string;
         conditions: Prisma.JsonValue;
@@ -93,16 +93,16 @@ export declare class PoliciesService {
             action: string;
             id: string;
             createdAt: Date;
-            resource: string;
             description: string | null;
+            resource: string;
         };
     } & {
         organizationId: string;
         id: string;
-        createdAt: Date;
-        name: string;
         isActive: boolean;
+        createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string | null;
         permissionId: string;
         conditions: Prisma.JsonValue;
@@ -112,10 +112,10 @@ export declare class PoliciesService {
     remove(id: string): Promise<{
         organizationId: string;
         id: string;
-        createdAt: Date;
-        name: string;
         isActive: boolean;
+        createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string | null;
         permissionId: string;
         conditions: Prisma.JsonValue;

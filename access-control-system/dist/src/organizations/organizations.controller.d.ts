@@ -10,8 +10,8 @@ export declare class OrganizationsController {
     }): Promise<{
         id: string;
         createdAt: Date;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         settings: import("@prisma/client/runtime/client").JsonValue;
     }>;
@@ -23,16 +23,12 @@ export declare class OrganizationsController {
         joinedAt: Date;
         id: string;
         createdAt: Date;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         settings: import("@prisma/client/runtime/client").JsonValue;
     }[]>;
     findOne(id: string): Promise<{
-        _count: {
-            roles: number;
-            members: number;
-        };
         members: ({
             user: {
                 id: string;
@@ -45,27 +41,31 @@ export declare class OrganizationsController {
             id: string;
             joinedAt: Date;
         })[];
+        _count: {
+            roles: number;
+            members: number;
+        };
     } & {
         id: string;
         createdAt: Date;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         settings: import("@prisma/client/runtime/client").JsonValue;
     }>;
     update(id: string, updateOrganizationDto: UpdateOrganizationDto): Promise<{
         id: string;
         createdAt: Date;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         settings: import("@prisma/client/runtime/client").JsonValue;
     }>;
     remove(id: string): Promise<{
         id: string;
         createdAt: Date;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         settings: import("@prisma/client/runtime/client").JsonValue;
     }>;

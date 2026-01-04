@@ -9,8 +9,8 @@ export declare class RolesController {
                 action: string;
                 id: string;
                 createdAt: Date;
-                resource: string;
                 description: string | null;
+                resource: string;
             };
         } & {
             id: string;
@@ -32,8 +32,8 @@ export declare class RolesController {
                 action: string;
                 id: string;
                 createdAt: Date;
-                resource: string;
                 description: string | null;
+                resource: string;
             };
         } & {
             id: string;
@@ -55,8 +55,8 @@ export declare class RolesController {
                 action: string;
                 id: string;
                 createdAt: Date;
-                resource: string;
                 description: string | null;
+                resource: string;
             };
         } & {
             id: string;
@@ -100,8 +100,8 @@ export declare class RolesController {
                 action: string;
                 id: string;
                 createdAt: Date;
-                resource: string;
                 description: string | null;
+                resource: string;
             };
         } & {
             id: string;
@@ -142,8 +142,8 @@ export declare class RolesController {
                     action: string;
                     id: string;
                     createdAt: Date;
-                    resource: string;
                     description: string | null;
+                    resource: string;
                 };
             } & {
                 id: string;
@@ -182,8 +182,8 @@ export declare class RolesController {
                     action: string;
                     id: string;
                     createdAt: Date;
-                    resource: string;
                     description: string | null;
+                    resource: string;
                 };
             } & {
                 id: string;

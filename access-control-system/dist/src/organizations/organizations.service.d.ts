@@ -7,8 +7,8 @@ export declare class OrganizationsService {
     create(createOrganizationDto: CreateOrganizationDto, userId: string): Promise<{
         id: string;
         createdAt: Date;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         settings: Prisma.JsonValue;
     }>;
@@ -16,16 +16,12 @@ export declare class OrganizationsService {
         joinedAt: Date;
         id: string;
         createdAt: Date;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         settings: Prisma.JsonValue;
     }[]>;
     findOne(id: string): Promise<{
-        _count: {
-            roles: number;
-            members: number;
-        };
         members: ({
             user: {
                 id: string;
@@ -38,35 +34,39 @@ export declare class OrganizationsService {
             id: string;
             joinedAt: Date;
         })[];
+        _count: {
+            roles: number;
+            members: number;
+        };
     } & {
         id: string;
         createdAt: Date;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         settings: Prisma.JsonValue;
     }>;
     findBySlug(slug: string): Promise<{
         id: string;
         createdAt: Date;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         settings: Prisma.JsonValue;
     }>;
     update(id: string, updateOrganizationDto: UpdateOrganizationDto): Promise<{
         id: string;
         createdAt: Date;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         settings: Prisma.JsonValue;
     }>;
     remove(id: string): Promise<{
         id: string;
         createdAt: Date;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         settings: Prisma.JsonValue;
     }>;

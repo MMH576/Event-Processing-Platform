@@ -29,8 +29,8 @@ export declare class AuthService {
             organization: {
                 id: string;
                 createdAt: Date;
-                name: string;
                 updatedAt: Date;
+                name: string;
                 slug: string;
                 settings: import("@prisma/client/runtime/client").JsonValue;
             };
@@ -42,11 +42,11 @@ export declare class AuthService {
         })[];
     } & {
         id: string;
-        createdAt: Date;
         email: string;
         password: string | null;
         fullName: string | null;
         isActive: boolean;
+        createdAt: Date;
         updatedAt: Date;
     }) | null>;
     private generateTokenResponse;

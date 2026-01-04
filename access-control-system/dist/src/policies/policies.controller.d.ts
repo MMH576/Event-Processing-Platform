@@ -13,16 +13,16 @@ export declare class PoliciesController {
             action: string;
             id: string;
             createdAt: Date;
-            resource: string;
             description: string | null;
+            resource: string;
         };
     } & {
         organizationId: string;
         id: string;
-        createdAt: Date;
-        name: string;
         isActive: boolean;
+        createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string | null;
         permissionId: string;
         conditions: import("@prisma/client/runtime/client").JsonValue;
@@ -39,16 +39,16 @@ export declare class PoliciesController {
             action: string;
             id: string;
             createdAt: Date;
-            resource: string;
             description: string | null;
+            resource: string;
         };
     } & {
         organizationId: string;
         id: string;
-        createdAt: Date;
-        name: string;
         isActive: boolean;
+        createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string | null;
         permissionId: string;
         conditions: import("@prisma/client/runtime/client").JsonValue;
@@ -65,16 +65,16 @@ export declare class PoliciesController {
             action: string;
             id: string;
             createdAt: Date;
-            resource: string;
             description: string | null;
+            resource: string;
         };
     } & {
         organizationId: string;
         id: string;
-        createdAt: Date;
-        name: string;
         isActive: boolean;
+        createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string | null;
         permissionId: string;
         conditions: import("@prisma/client/runtime/client").JsonValue;
@@ -91,16 +91,16 @@ export declare class PoliciesController {
             action: string;
             id: string;
             createdAt: Date;
-            resource: string;
             description: string | null;
+            resource: string;
         };
     } & {
         organizationId: string;
         id: string;
-        createdAt: Date;
-        name: string;
         isActive: boolean;
+        createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string | null;
         permissionId: string;
         conditions: import("@prisma/client/runtime/client").JsonValue;
@@ -110,10 +110,10 @@ export declare class PoliciesController {
     remove(id: string): Promise<{
         organizationId: string;
         id: string;
-        createdAt: Date;
-        name: string;
         isActive: boolean;
+        createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string | null;
         permissionId: string;
         conditions: import("@prisma/client/runtime/client").JsonValue;
