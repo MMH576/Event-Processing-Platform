@@ -6,11 +6,11 @@ export declare class RolesService {
     create(createRoleDto: CreateRoleDto): Promise<{
         permissions: ({
             permission: {
+                id: string;
+                createdAt: Date;
                 resource: string;
                 action: string;
                 description: string | null;
-                id: string;
-                createdAt: Date;
             };
         } & {
             id: string;
@@ -19,21 +19,21 @@ export declare class RolesService {
             permissionId: string;
         })[];
     } & {
-        description: string | null;
         id: string;
         createdAt: Date;
         name: string;
         organizationId: string | null;
+        description: string | null;
         isSystemRole: boolean;
     }>;
     findAll(organizationId?: string): Promise<({
         permissions: ({
             permission: {
+                id: string;
+                createdAt: Date;
                 resource: string;
                 action: string;
                 description: string | null;
-                id: string;
-                createdAt: Date;
             };
         } & {
             id: string;
@@ -42,21 +42,21 @@ export declare class RolesService {
             permissionId: string;
         })[];
     } & {
-        description: string | null;
         id: string;
         createdAt: Date;
         name: string;
         organizationId: string | null;
+        description: string | null;
         isSystemRole: boolean;
     })[]>;
     findOne(id: string): Promise<{
         permissions: ({
             permission: {
+                id: string;
+                createdAt: Date;
                 resource: string;
                 action: string;
                 description: string | null;
-                id: string;
-                createdAt: Date;
             };
         } & {
             id: string;
@@ -66,42 +66,42 @@ export declare class RolesService {
         })[];
         users: ({
             user: {
-                id: string;
                 email: string;
                 fullName: string | null;
+                id: string;
             };
         } & {
             id: string;
             organizationId: string;
-            roleId: string;
             userId: string;
+            roleId: string;
             assignedAt: Date;
             assignedBy: string | null;
         })[];
     } & {
-        description: string | null;
         id: string;
         createdAt: Date;
         name: string;
         organizationId: string | null;
+        description: string | null;
         isSystemRole: boolean;
     }>;
     remove(id: string): Promise<{
-        description: string | null;
         id: string;
         createdAt: Date;
         name: string;
         organizationId: string | null;
+        description: string | null;
         isSystemRole: boolean;
     }>;
     assignPermissions(roleId: string, dto: AssignPermissionsDto): Promise<{
         permissions: ({
             permission: {
+                id: string;
+                createdAt: Date;
                 resource: string;
                 action: string;
                 description: string | null;
-                id: string;
-                createdAt: Date;
             };
         } & {
             id: string;
@@ -111,35 +111,35 @@ export declare class RolesService {
         })[];
         users: ({
             user: {
-                id: string;
                 email: string;
                 fullName: string | null;
+                id: string;
             };
         } & {
             id: string;
             organizationId: string;
-            roleId: string;
             userId: string;
+            roleId: string;
             assignedAt: Date;
             assignedBy: string | null;
         })[];
     } & {
-        description: string | null;
         id: string;
         createdAt: Date;
         name: string;
         organizationId: string | null;
+        description: string | null;
         isSystemRole: boolean;
     }>;
     assignRoleToUser(userId: string, dto: AssignRoleDto, assignedBy?: string): Promise<{
         role: {
             permissions: ({
                 permission: {
+                    id: string;
+                    createdAt: Date;
                     resource: string;
                     action: string;
                     description: string | null;
-                    id: string;
-                    createdAt: Date;
                 };
             } & {
                 id: string;
@@ -148,26 +148,26 @@ export declare class RolesService {
                 permissionId: string;
             })[];
         } & {
-            description: string | null;
             id: string;
             createdAt: Date;
             name: string;
             organizationId: string | null;
+            description: string | null;
             isSystemRole: boolean;
         };
     } & {
         id: string;
         organizationId: string;
-        roleId: string;
         userId: string;
+        roleId: string;
         assignedAt: Date;
         assignedBy: string | null;
     }>;
     removeRoleFromUser(userId: string, roleId: string, organizationId: string): Promise<{
         id: string;
         organizationId: string;
-        roleId: string;
         userId: string;
+        roleId: string;
         assignedAt: Date;
         assignedBy: string | null;
     }>;
@@ -175,11 +175,11 @@ export declare class RolesService {
         role: {
             permissions: ({
                 permission: {
+                    id: string;
+                    createdAt: Date;
                     resource: string;
                     action: string;
                     description: string | null;
-                    id: string;
-                    createdAt: Date;
                 };
             } & {
                 id: string;
@@ -188,18 +188,18 @@ export declare class RolesService {
                 permissionId: string;
             })[];
         } & {
-            description: string | null;
             id: string;
             createdAt: Date;
             name: string;
             organizationId: string | null;
+            description: string | null;
             isSystemRole: boolean;
         };
     } & {
         id: string;
         organizationId: string;
-        roleId: string;
         userId: string;
+        roleId: string;
         assignedAt: Date;
         assignedBy: string | null;
     })[]>;
