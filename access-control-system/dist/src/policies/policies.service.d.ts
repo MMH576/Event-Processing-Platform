@@ -7,120 +7,120 @@ export declare class PoliciesService {
     constructor(prisma: PrismaService);
     create(createPolicyDto: CreatePolicyDto): Promise<{
         organization: {
-            id: string;
             name: string;
+            id: string;
             slug: string;
         };
         permission: {
+            description: string | null;
             id: string;
             createdAt: Date;
             resource: string;
             action: string;
-            description: string | null;
         };
     } & {
-        id: string;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         name: string;
-        organizationId: string;
         description: string | null;
+        organizationId: string;
         permissionId: string;
         conditions: Prisma.JsonValue;
         effect: string;
         priority: number;
+        isActive: boolean;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     findAll(organizationId?: string): Promise<({
         organization: {
-            id: string;
             name: string;
+            id: string;
             slug: string;
         };
         permission: {
+            description: string | null;
             id: string;
             createdAt: Date;
             resource: string;
             action: string;
-            description: string | null;
         };
     } & {
-        id: string;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         name: string;
-        organizationId: string;
         description: string | null;
+        organizationId: string;
         permissionId: string;
         conditions: Prisma.JsonValue;
         effect: string;
         priority: number;
+        isActive: boolean;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
     })[]>;
     findOne(id: string): Promise<{
         organization: {
-            id: string;
             name: string;
+            id: string;
             slug: string;
         };
         permission: {
+            description: string | null;
             id: string;
             createdAt: Date;
             resource: string;
             action: string;
-            description: string | null;
         };
     } & {
-        id: string;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         name: string;
-        organizationId: string;
         description: string | null;
+        organizationId: string;
         permissionId: string;
         conditions: Prisma.JsonValue;
         effect: string;
         priority: number;
+        isActive: boolean;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     update(id: string, updatePolicyDto: UpdatePolicyDto): Promise<{
         organization: {
-            id: string;
             name: string;
+            id: string;
             slug: string;
         };
         permission: {
+            description: string | null;
             id: string;
             createdAt: Date;
             resource: string;
             action: string;
-            description: string | null;
         };
     } & {
-        id: string;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         name: string;
-        organizationId: string;
         description: string | null;
+        organizationId: string;
         permissionId: string;
         conditions: Prisma.JsonValue;
         effect: string;
         priority: number;
+        isActive: boolean;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     remove(id: string): Promise<{
-        id: string;
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
         name: string;
-        organizationId: string;
         description: string | null;
+        organizationId: string;
         permissionId: string;
         conditions: Prisma.JsonValue;
         effect: string;
         priority: number;
+        isActive: boolean;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     evaluatePolicies(permissionKey: string, organizationId: string, context: PolicyContext): Promise<PolicyEvaluationResult>;
     private evaluateConditions;
