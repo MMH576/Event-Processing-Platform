@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Organization {
+  id        String               @id @default(uuid())
+  name      String
+  slug      String               @unique
+  settings  Json                 @default("{}")
+  createdAt DateTime             @default(now()) @map("created_at")
+  updatedAt DateTime             @updatedAt @map("updated_at")
+  auditLogs AuditLog[]
+  members   OrganizationMember[]
+  policies  Policy[]
+  resources ResourceOwner[]
+  roles     Role[]
+
+  @@map("organizations")
+}
+
+model User {
+  id             String               @id @default(uuid())
+  email          String               @unique
+  password       String?
+  fullName       String?              @map("full_name")
+  isActive       Boolean              @default(true) @map("is_active")
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @updatedAt @map("updated_at")
+  auditLogs      AuditLog[]
+  organizations  OrganizationMember[]
+  ownedResources ResourceOwner[]
+  roles          UserRole[]
+
+  @@map("users")
+}
+
+model OrganizationMember {
+  id             String       @id @default(uuid())
+  organizationId String       @map("organization_id")
+  userId         String       @map("user_id")
+  joinedAt       DateTime     @default(now()) @map("joined_at")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@map("organization_members")
+}
+
+model Role {
+  id             String           @id @default(uuid())
+  organizationId String?          @map("organization_id")
+  name           String
+  description    String?
+  isSystemRole   Boolean          @default(false) @map("is_system_role")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  permissions    RolePermission[]
+  organization   Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  users          UserRole[]
+
+  @@unique([organizationId, name])
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  resource    String
+  action      String
+  description String?
+  createdAt   DateTime         @default(now()) @map("created_at")
+  policies    Policy[]
+  roles       RolePermission[]
+
+  @@unique([resource, action])
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  roleId       String     @map("role_id")
+  permissionId String     @map("permission_id")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserRole {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  roleId         String   @map("role_id")
+  organizationId String   @map("organization_id")
+  assignedAt     DateTime @default(now()) @map("assigned_at")
+  assignedBy     String?  @map("assigned_by")
+  role           Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId, organizationId])
+  @@map("user_roles")
+}
+
+model Policy {
+  id             String       @id @default(uuid())
+  organizationId String       @map("organization_id")
+  name           String
+  description    String?
+  permissionId   String       @map("permission_id")
+  conditions     Json
+  effect         String
+  priority       Int          @default(0)
+  isActive       Boolean      @default(true) @map("is_active")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  permission     Permission   @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@map("policies")
+}
+
+model ResourceOwner {
+  id             String       @id @default(uuid())
+  resourceType   String       @map("resource_type")
+  resourceId     String       @map("resource_id")
+  ownerUserId    String       @map("owner_user_id")
+  organizationId String       @map("organization_id")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  owner          User         @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+
+  @@unique([resourceType, resourceId])
+  @@map("resource_owners")
+}
+
+model AuditLog {
+  id             String        @id @default(uuid())
+  userId         String?       @map("user_id")
+  userEmail      String?       @map("user_email")
+  organizationId String?       @map("organization_id")
+  action         String
+  resourceType   String?       @map("resource_type")
+  resourceId     String?       @map("resource_id")
+  timestamp      DateTime      @default(now())
+  result         String
+  reason         String?
+  metadata       Json          @default("{}")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  user           User?         @relation(fields: [userId], references: [id])
+
+  @@index([userId, timestamp])
+  @@index([organizationId, timestamp])
+  @@index([resourceType, resourceId, timestamp])
+  @@index([action, timestamp])
+  @@map("audit_logs")
+}
