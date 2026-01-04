@@ -5,7 +5,11 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateOrganizationDto, UpdateOrganizationDto, AddMemberDto } from './dto';
+import {
+  CreateOrganizationDto,
+  UpdateOrganizationDto,
+  AddMemberDto,
+} from './dto';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
@@ -30,7 +34,8 @@ export class OrganizationsService {
         data: {
           name: createOrganizationDto.name,
           slug: createOrganizationDto.slug,
-          settings: (createOrganizationDto.settings || {}) as Prisma.InputJsonValue,
+          settings: (createOrganizationDto.settings ||
+            {}) as Prisma.InputJsonValue,
         },
       });
 
@@ -141,7 +146,9 @@ export class OrganizationsService {
     });
 
     if (!user) {
-      throw new NotFoundException(`User with ID ${addMemberDto.userId} not found`);
+      throw new NotFoundException(
+        `User with ID ${addMemberDto.userId} not found`,
+      );
     }
 
     // Check if already a member
@@ -155,7 +162,9 @@ export class OrganizationsService {
     });
 
     if (existingMember) {
-      throw new ConflictException('User is already a member of this organization');
+      throw new ConflictException(
+        'User is already a member of this organization',
+      );
     }
 
     return this.prisma.organizationMember.create({

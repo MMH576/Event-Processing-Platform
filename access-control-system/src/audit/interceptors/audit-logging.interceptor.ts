@@ -27,7 +27,9 @@ export class AuditLoggingInterceptor implements NestInterceptor {
       [context.getHandler(), context.getClass()],
     );
 
-    const action = customAction || `${request.method}:${request.route?.path || request.path}`;
+    const action =
+      customAction ||
+      `${request.method}:${request.route?.path || request.path}`;
 
     // Extract user info (may be undefined for unauthenticated requests)
     const user = request.user;

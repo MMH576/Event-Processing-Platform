@@ -1,4 +1,9 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 
@@ -73,7 +78,10 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     try {
       return await this.client.keys(pattern);
     } catch (error) {
-      this.logger.error(`Redis KEYS error for pattern ${pattern}:`, error.message);
+      this.logger.error(
+        `Redis KEYS error for pattern ${pattern}:`,
+        error.message,
+      );
       return [];
     }
   }
@@ -83,10 +91,15 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       const keys = await this.keys(pattern);
       if (keys.length > 0) {
         await this.client.del(...keys);
-        this.logger.debug(`Invalidated ${keys.length} keys matching pattern: ${pattern}`);
+        this.logger.debug(
+          `Invalidated ${keys.length} keys matching pattern: ${pattern}`,
+        );
       }
     } catch (error) {
-      this.logger.error(`Redis invalidatePattern error for ${pattern}:`, error.message);
+      this.logger.error(
+        `Redis invalidatePattern error for ${pattern}:`,
+        error.message,
+      );
     }
   }
 

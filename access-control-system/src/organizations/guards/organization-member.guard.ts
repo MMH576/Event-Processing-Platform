@@ -30,9 +30,7 @@ export class OrganizationMemberGuard implements CanActivate {
     );
 
     if (!isMember) {
-      throw new ForbiddenException(
-        'You are not a member of this organization',
-      );
+      throw new ForbiddenException('You are not a member of this organization');
     }
 
     return true;

@@ -103,7 +103,8 @@ export class RolesService {
   }
 
   async assignPermissions(roleId: string, dto: AssignPermissionsDto) {
-    const role = await this.findOne(roleId);
+    // Verify role exists
+    await this.findOne(roleId);
 
     // Remove existing permissions
     await this.prisma.rolePermission.deleteMany({
@@ -129,12 +130,18 @@ export class RolesService {
     for (const { userId, organizationId } of usersWithRole) {
       await this.invalidateUserPermissions(userId, organizationId);
     }
-    this.logger.debug(`Invalidated cache for ${usersWithRole.length} users after role permission change`);
+    this.logger.debug(
+      `Invalidated cache for ${usersWithRole.length} users after role permission change`,
+    );
 
     return this.findOne(roleId);
   }
 
-  async assignRoleToUser(userId: string, dto: AssignRoleDto, assignedBy?: string) {
+  async assignRoleToUser(
+    userId: string,
+    dto: AssignRoleDto,
+    assignedBy?: string,
+  ) {
     // Check if role exists
     await this.findOne(dto.roleId);
 
@@ -188,7 +195,11 @@ export class RolesService {
     return result;
   }
 
-  async removeRoleFromUser(userId: string, roleId: string, organizationId: string) {
+  async removeRoleFromUser(
+    userId: string,
+    roleId: string,
+    organizationId: string,
+  ) {
     const userRole = await this.prisma.userRole.findUnique({
       where: {
         userId_roleId_organizationId: {
@@ -270,7 +281,11 @@ export class RolesService {
     const permissionArray = Array.from(permissions);
 
     // Cache the result
-    await this.redis.set(cacheKey, JSON.stringify(permissionArray), this.CACHE_TTL);
+    await this.redis.set(
+      cacheKey,
+      JSON.stringify(permissionArray),
+      this.CACHE_TTL,
+    );
     this.logger.debug(`Cached permissions for: ${cacheKey}`);
 
     return permissionArray;
