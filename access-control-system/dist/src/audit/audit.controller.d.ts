@@ -7,15 +7,15 @@ export declare class AuditController {
     getStats(organizationId?: string): Promise<import("./interfaces/audit-log.interface").AuditLogStats>;
     findOne(id: string): Promise<{
         metadata: Record<string, unknown>;
-        organization: {
-            id: string;
-            name: string;
-            slug: string;
-        } | null;
         user: {
             id: string;
             email: string;
             fullName: string | null;
+        } | null;
+        organization: {
+            id: string;
+            name: string;
+            slug: string;
         } | null;
         userId: string | null;
         userEmail: string | null;
