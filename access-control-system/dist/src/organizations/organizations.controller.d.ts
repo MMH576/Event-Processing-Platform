@@ -9,11 +9,11 @@ export declare class OrganizationsController {
         };
     }): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         slug: string;
         settings: import("@prisma/client/runtime/client").JsonValue;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     findAll(req: {
         user: {
@@ -22,18 +22,18 @@ export declare class OrganizationsController {
     }): Promise<{
         joinedAt: Date;
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         slug: string;
         settings: import("@prisma/client/runtime/client").JsonValue;
-        createdAt: Date;
-        updatedAt: Date;
     }[]>;
     findOne(id: string): Promise<{
         members: ({
             user: {
-                id: string;
                 email: string;
                 fullName: string | null;
+                id: string;
             };
         } & {
             id: string;
@@ -42,38 +42,38 @@ export declare class OrganizationsController {
             joinedAt: Date;
         })[];
         _count: {
-            members: number;
             roles: number;
+            members: number;
         };
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         slug: string;
         settings: import("@prisma/client/runtime/client").JsonValue;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     update(id: string, updateOrganizationDto: UpdateOrganizationDto): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         slug: string;
         settings: import("@prisma/client/runtime/client").JsonValue;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     remove(id: string): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         name: string;
         slug: string;
         settings: import("@prisma/client/runtime/client").JsonValue;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     addMember(id: string, addMemberDto: AddMemberDto): Promise<{
         user: {
-            id: string;
             email: string;
             fullName: string | null;
+            id: string;
         };
     } & {
         id: string;
@@ -83,9 +83,9 @@ export declare class OrganizationsController {
     }>;
     getMembers(id: string): Promise<({
         user: {
-            id: string;
             email: string;
             fullName: string | null;
+            id: string;
             isActive: boolean;
         };
     } & {
