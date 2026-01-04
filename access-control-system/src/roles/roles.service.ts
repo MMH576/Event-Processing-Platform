@@ -2,13 +2,21 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { RedisService } from '../redis/redis.service';
 import { CreateRoleDto, AssignPermissionsDto, AssignRoleDto } from './dto';
 
 @Injectable()
 export class RolesService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(RolesService.name);
+  private readonly CACHE_TTL = 300; // 5 minutes
+
+  constructor(
+    private prisma: PrismaService,
+    private redis: RedisService,
+  ) {}
 
   async create(createRoleDto: CreateRoleDto) {
     const existing = await this.prisma.role.findFirst({
@@ -95,7 +103,7 @@ export class RolesService {
   }
 
   async assignPermissions(roleId: string, dto: AssignPermissionsDto) {
-    await this.findOne(roleId);
+    const role = await this.findOne(roleId);
 
     // Remove existing permissions
     await this.prisma.rolePermission.deleteMany({
@@ -111,6 +119,17 @@ export class RolesService {
         })),
       });
     }
+
+    // Invalidate cache for all users with this role
+    const usersWithRole = await this.prisma.userRole.findMany({
+      where: { roleId },
+      select: { userId: true, organizationId: true },
+    });
+
+    for (const { userId, organizationId } of usersWithRole) {
+      await this.invalidateUserPermissions(userId, organizationId);
+    }
+    this.logger.debug(`Invalidated cache for ${usersWithRole.length} users after role permission change`);
 
     return this.findOne(roleId);
   }
@@ -143,7 +162,7 @@ export class RolesService {
       throw new ConflictException('User already has this role');
     }
 
-    return this.prisma.userRole.create({
+    const result = await this.prisma.userRole.create({
       data: {
         userId,
         roleId: dto.roleId,
@@ -162,6 +181,11 @@ export class RolesService {
         },
       },
     });
+
+    // Invalidate user's permission cache
+    await this.invalidateUserPermissions(userId, dto.organizationId);
+
+    return result;
   }
 
   async removeRoleFromUser(userId: string, roleId: string, organizationId: string) {
@@ -179,9 +203,14 @@ export class RolesService {
       throw new NotFoundException('User does not have this role');
     }
 
-    return this.prisma.userRole.delete({
+    const result = await this.prisma.userRole.delete({
       where: { id: userRole.id },
     });
+
+    // Invalidate user's permission cache
+    await this.invalidateUserPermissions(userId, organizationId);
+
+    return result;
   }
 
   async getUserRoles(userId: string) {
@@ -202,6 +231,17 @@ export class RolesService {
   }
 
   async getUserPermissions(userId: string, organizationId?: string) {
+    const cacheKey = `perm:${userId}:${organizationId || 'all'}`;
+
+    // Check cache first
+    const cached = await this.redis.get(cacheKey);
+    if (cached) {
+      this.logger.debug(`Cache hit for permissions: ${cacheKey}`);
+      return JSON.parse(cached);
+    }
+
+    this.logger.debug(`Cache miss for permissions: ${cacheKey}`);
+
     const userRoles = await this.prisma.userRole.findMany({
       where: {
         userId,
@@ -227,6 +267,21 @@ export class RolesService {
       }
     }
 
-    return Array.from(permissions);
+    const permissionArray = Array.from(permissions);
+
+    // Cache the result
+    await this.redis.set(cacheKey, JSON.stringify(permissionArray), this.CACHE_TTL);
+    this.logger.debug(`Cached permissions for: ${cacheKey}`);
+
+    return permissionArray;
+  }
+
+  async invalidateUserPermissions(userId: string, organizationId?: string) {
+    if (organizationId) {
+      await this.redis.del(`perm:${userId}:${organizationId}`);
+    }
+    // Also invalidate the 'all' cache
+    await this.redis.del(`perm:${userId}:all`);
+    this.logger.debug(`Invalidated permission cache for user: ${userId}`);
   }
 }

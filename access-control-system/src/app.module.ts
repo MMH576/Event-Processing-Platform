@@ -11,6 +11,7 @@ import { OrganizationsModule } from './organizations/organizations.module';
 import { PoliciesModule } from './policies/policies.module';
 import { AuditModule } from './audit/audit.module';
 import { AuditLoggingInterceptor } from './audit/interceptors/audit-logging.interceptor';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AuditLoggingInterceptor } from './audit/interceptors/audit-logging.inte
       isGlobal: true,
     }),
     PrismaModule,
+    RedisModule,
     AuditModule,
     AuthModule,
     PermissionsModule,
