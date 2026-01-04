@@ -8,18 +8,24 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PermissionsGuard = void 0;
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const permissions_decorator_1 = require("../decorators/permissions.decorator");
 const roles_service_1 = require("../../roles/roles.service");
+const policies_service_1 = require("../../policies/policies.service");
 let PermissionsGuard = class PermissionsGuard {
     reflector;
     rolesService;
-    constructor(reflector, rolesService) {
+    policiesService;
+    constructor(reflector, rolesService, policiesService) {
         this.reflector = reflector;
         this.rolesService = rolesService;
+        this.policiesService = policiesService;
     }
     async canActivate(context) {
         const requiredPermissions = this.reflector.getAllAndOverride(permissions_decorator_1.PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);
@@ -32,18 +38,53 @@ let PermissionsGuard = class PermissionsGuard {
             throw new common_1.ForbiddenException('User not authenticated');
         }
         const organizationId = request.headers['x-organization-id'] || request.query.organizationId;
-        const userPermissions = await this.rolesService.getUserPermissions(user.sub, organizationId);
+        const userPermissions = await this.rolesService.getUserPermissions(user.id, organizationId);
         const hasPermission = requiredPermissions.every((permission) => userPermissions.includes(permission));
         if (!hasPermission) {
             throw new common_1.ForbiddenException(`Missing required permissions: ${requiredPermissions.join(', ')}`);
         }
+        if (this.policiesService && organizationId) {
+            const policyContext = this.buildPolicyContext(request, user, organizationId);
+            for (const permission of requiredPermissions) {
+                const result = await this.policiesService.evaluatePolicies(permission, organizationId, policyContext);
+                if (!result.allowed) {
+                    const reason = result.matchedPolicy
+                        ? `Policy '${result.matchedPolicy.name}' denied access: ${result.reason}`
+                        : result.reason;
+                    throw new common_1.ForbiddenException(`Access denied by policy: ${reason}`);
+                }
+            }
+        }
         return true;
+    }
+    buildPolicyContext(request, user, organizationId) {
+        const body = request.body || {};
+        const query = request.query || {};
+        const headers = request.headers || {};
+        return {
+            userId: user.id,
+            organizationId,
+            resourceType: headers['x-resource-type'] || query.resourceType,
+            resourceId: request.params?.id || query.resourceId,
+            resourceOwnerId: headers['x-resource-owner-id'] || body.ownerId,
+            amount: body.amount ? parseFloat(body.amount) : undefined,
+            timestamp: new Date(),
+            userDepartment: headers['x-user-department'] || user.department,
+            metadata: {
+                method: request.method,
+                path: request.path,
+                ip: request.ip,
+            },
+        };
     }
 };
 exports.PermissionsGuard = PermissionsGuard;
 exports.PermissionsGuard = PermissionsGuard = __decorate([
     (0, common_1.Injectable)(),
+    __param(2, (0, common_1.Optional)()),
+    __param(2, (0, common_1.Inject)(policies_service_1.PoliciesService)),
     __metadata("design:paramtypes", [core_1.Reflector,
-        roles_service_1.RolesService])
+        roles_service_1.RolesService,
+        policies_service_1.PoliciesService])
 ], PermissionsGuard);
 //# sourceMappingURL=permissions.guard.js.map

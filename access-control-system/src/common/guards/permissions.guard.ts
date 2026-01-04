@@ -3,16 +3,21 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  Inject,
+  Optional,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
 import { RolesService } from '../../roles/roles.service';
+import { PoliciesService } from '../../policies/policies.service';
+import { PolicyContext } from '../../policies/interfaces/policy-context.interface';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private rolesService: RolesService,
+    @Optional() @Inject(PoliciesService) private policiesService?: PoliciesService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -34,8 +39,9 @@ export class PermissionsGuard implements CanActivate {
 
     const organizationId = request.headers['x-organization-id'] || request.query.organizationId;
 
+    // PHASE 1: RBAC Check
     const userPermissions = await this.rolesService.getUserPermissions(
-      user.sub,
+      user.id,
       organizationId,
     );
 
@@ -49,6 +55,54 @@ export class PermissionsGuard implements CanActivate {
       );
     }
 
+    // PHASE 2: ABAC Policy Check (if policies service is available and org is specified)
+    if (this.policiesService && organizationId) {
+      const policyContext = this.buildPolicyContext(request, user, organizationId);
+
+      for (const permission of requiredPermissions) {
+        const result = await this.policiesService.evaluatePolicies(
+          permission,
+          organizationId,
+          policyContext,
+        );
+
+        if (!result.allowed) {
+          const reason = result.matchedPolicy
+            ? `Policy '${result.matchedPolicy.name}' denied access: ${result.reason}`
+            : result.reason;
+
+          throw new ForbiddenException(`Access denied by policy: ${reason}`);
+        }
+      }
+    }
+
     return true;
+  }
+
+  private buildPolicyContext(
+    request: any,
+    user: any,
+    organizationId: string,
+  ): PolicyContext {
+    // Extract context from request body, query, or headers
+    const body = request.body || {};
+    const query = request.query || {};
+    const headers = request.headers || {};
+
+    return {
+      userId: user.id,
+      organizationId,
+      resourceType: headers['x-resource-type'] || query.resourceType,
+      resourceId: request.params?.id || query.resourceId,
+      resourceOwnerId: headers['x-resource-owner-id'] || body.ownerId,
+      amount: body.amount ? parseFloat(body.amount) : undefined,
+      timestamp: new Date(),
+      userDepartment: headers['x-user-department'] || user.department,
+      metadata: {
+        method: request.method,
+        path: request.path,
+        ip: request.ip,
+      },
+    };
   }
 }

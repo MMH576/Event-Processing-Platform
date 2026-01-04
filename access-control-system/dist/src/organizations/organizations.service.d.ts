@@ -22,10 +22,6 @@ export declare class OrganizationsService {
         settings: Prisma.JsonValue;
     }[]>;
     findOne(id: string): Promise<{
-        _count: {
-            roles: number;
-            members: number;
-        };
         members: ({
             user: {
                 email: string;
@@ -38,6 +34,10 @@ export declare class OrganizationsService {
             userId: string;
             joinedAt: Date;
         })[];
+        _count: {
+            roles: number;
+            members: number;
+        };
     } & {
         id: string;
         createdAt: Date;
