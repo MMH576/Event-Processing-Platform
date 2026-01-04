@@ -1,11 +1,13 @@
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../audit/audit.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 export declare class AuthService {
     private prisma;
     private jwtService;
-    constructor(prisma: PrismaService, jwtService: JwtService);
+    private auditService;
+    constructor(prisma: PrismaService, jwtService: JwtService, auditService: AuditService);
     register(registerDto: RegisterDto): Promise<{
         access_token: string;
         user: {
@@ -27,24 +29,24 @@ export declare class AuthService {
             organization: {
                 id: string;
                 createdAt: Date;
-                updatedAt: Date;
                 name: string;
+                updatedAt: Date;
                 slug: string;
                 settings: import("@prisma/client/runtime/client").JsonValue;
             };
         } & {
-            id: string;
-            organizationId: string;
             userId: string;
+            organizationId: string;
+            id: string;
             joinedAt: Date;
         })[];
     } & {
         id: string;
+        createdAt: Date;
         email: string;
         password: string | null;
         fullName: string | null;
         isActive: boolean;
-        createdAt: Date;
         updatedAt: Date;
     }) | null>;
     private generateTokenResponse;

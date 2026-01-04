@@ -9,6 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
+const core_1 = require("@nestjs/core");
 const app_controller_1 = require("./app.controller");
 const app_service_1 = require("./app.service");
 const prisma_module_1 = require("./prisma/prisma.module");
@@ -17,6 +18,8 @@ const permissions_module_1 = require("./permissions/permissions.module");
 const roles_module_1 = require("./roles/roles.module");
 const organizations_module_1 = require("./organizations/organizations.module");
 const policies_module_1 = require("./policies/policies.module");
+const audit_module_1 = require("./audit/audit.module");
+const audit_logging_interceptor_1 = require("./audit/interceptors/audit-logging.interceptor");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -27,6 +30,7 @@ exports.AppModule = AppModule = __decorate([
                 isGlobal: true,
             }),
             prisma_module_1.PrismaModule,
+            audit_module_1.AuditModule,
             auth_module_1.AuthModule,
             permissions_module_1.PermissionsModule,
             roles_module_1.RolesModule,
@@ -34,7 +38,13 @@ exports.AppModule = AppModule = __decorate([
             policies_module_1.PoliciesModule,
         ],
         controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
+        providers: [
+            app_service_1.AppService,
+            {
+                provide: core_1.APP_INTERCEPTOR,
+                useClass: audit_logging_interceptor_1.AuditLoggingInterceptor,
+            },
+        ],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

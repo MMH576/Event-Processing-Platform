@@ -46,13 +46,16 @@ exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const prisma_service_1 = require("../prisma/prisma.service");
+const audit_service_1 = require("../audit/audit.service");
 const bcrypt = __importStar(require("bcrypt"));
 let AuthService = class AuthService {
     prisma;
     jwtService;
-    constructor(prisma, jwtService) {
+    auditService;
+    constructor(prisma, jwtService, auditService) {
         this.prisma = prisma;
         this.jwtService = jwtService;
+        this.auditService = auditService;
     }
     async register(registerDto) {
         const { email, password, fullName } = registerDto;
@@ -60,6 +63,12 @@ let AuthService = class AuthService {
             where: { email },
         });
         if (existingUser) {
+            await this.auditService.create({
+                userEmail: email,
+                action: 'auth:register',
+                result: 'failure',
+                reason: 'User with this email already exists',
+            });
             throw new common_1.ConflictException('User with this email already exists');
         }
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -70,6 +79,12 @@ let AuthService = class AuthService {
                 fullName,
             },
         });
+        await this.auditService.create({
+            userId: user.id,
+            userEmail: user.email,
+            action: 'auth:register',
+            result: 'success',
+        });
         return this.generateTokenResponse(user);
     }
     async login(loginDto) {
@@ -78,15 +93,41 @@ let AuthService = class AuthService {
             where: { email },
         });
         if (!user || !user.password) {
+            await this.auditService.create({
+                userEmail: email,
+                action: 'auth:login',
+                result: 'failure',
+                reason: 'Invalid credentials - user not found',
+            });
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
+            await this.auditService.create({
+                userId: user.id,
+                userEmail: email,
+                action: 'auth:login',
+                result: 'failure',
+                reason: 'Invalid credentials - wrong password',
+            });
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
         if (!user.isActive) {
+            await this.auditService.create({
+                userId: user.id,
+                userEmail: email,
+                action: 'auth:login',
+                result: 'failure',
+                reason: 'User account is deactivated',
+            });
             throw new common_1.UnauthorizedException('User account is deactivated');
         }
+        await this.auditService.create({
+            userId: user.id,
+            userEmail: user.email,
+            action: 'auth:login',
+            result: 'success',
+        });
         return this.generateTokenResponse(user);
     }
     async validateUser(userId) {
@@ -121,6 +162,7 @@ exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        audit_service_1.AuditService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map
