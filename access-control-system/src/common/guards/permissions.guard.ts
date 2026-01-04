@@ -10,6 +10,7 @@ import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
 import { RolesService } from '../../roles/roles.service';
 import { PoliciesService } from '../../policies/policies.service';
+import { AuditService } from '../../audit/audit.service';
 import { PolicyContext } from '../../policies/interfaces/policy-context.interface';
 
 @Injectable()
@@ -18,6 +19,7 @@ export class PermissionsGuard implements CanActivate {
     private reflector: Reflector,
     private rolesService: RolesService,
     @Optional() @Inject(PoliciesService) private policiesService?: PoliciesService,
+    @Optional() @Inject(AuditService) private auditService?: AuditService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -50,6 +52,25 @@ export class PermissionsGuard implements CanActivate {
     );
 
     if (!hasPermission) {
+      // Log RBAC denial
+      if (this.auditService) {
+        await this.auditService.create({
+          userId: user.id,
+          userEmail: user.email,
+          organizationId,
+          action: 'access:denied',
+          resourceType: 'permission',
+          resourceId: request.params?.id,
+          result: 'failure',
+          reason: `Missing required permissions: ${requiredPermissions.join(', ')}`,
+          metadata: {
+            method: request.method,
+            path: request.path,
+            requiredPermissions,
+            userPermissions,
+          },
+        });
+      }
       throw new ForbiddenException(
         `Missing required permissions: ${requiredPermissions.join(', ')}`,
       );
@@ -70,6 +91,27 @@ export class PermissionsGuard implements CanActivate {
           const reason = result.matchedPolicy
             ? `Policy '${result.matchedPolicy.name}' denied access: ${result.reason}`
             : result.reason;
+
+          // Log ABAC policy denial
+          if (this.auditService) {
+            await this.auditService.create({
+              userId: user.id,
+              userEmail: user.email,
+              organizationId,
+              action: 'policy:deny',
+              resourceType: 'policy',
+              resourceId: result.matchedPolicy?.id,
+              result: 'failure',
+              reason: `Access denied by policy: ${reason}`,
+              metadata: {
+                method: request.method,
+                path: request.path,
+                permission,
+                policyName: result.matchedPolicy?.name,
+                policyEffect: result.matchedPolicy?.effect,
+              },
+            });
+          }
 
           throw new ForbiddenException(`Access denied by policy: ${reason}`);
         }

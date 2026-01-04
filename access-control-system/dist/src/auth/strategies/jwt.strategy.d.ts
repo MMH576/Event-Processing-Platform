@@ -15,24 +15,24 @@ export declare class JwtStrategy extends JwtStrategy_base {
             organization: {
                 id: string;
                 createdAt: Date;
-                updatedAt: Date;
                 name: string;
+                updatedAt: Date;
                 slug: string;
                 settings: import("@prisma/client/runtime/client").JsonValue;
             };
         } & {
-            id: string;
-            organizationId: string;
             userId: string;
+            organizationId: string;
+            id: string;
             joinedAt: Date;
         })[];
     } & {
+        id: string;
+        createdAt: Date;
         email: string;
         password: string | null;
         fullName: string | null;
-        id: string;
         isActive: boolean;
-        createdAt: Date;
         updatedAt: Date;
     }>;
 }

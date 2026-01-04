@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../audit/audit.service';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -14,6 +15,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private auditService: AuditService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -25,6 +27,13 @@ export class AuthService {
     });
 
     if (existingUser) {
+      // Log failed registration attempt
+      await this.auditService.create({
+        userEmail: email,
+        action: 'auth:register',
+        result: 'failure',
+        reason: 'User with this email already exists',
+      });
       throw new ConflictException('User with this email already exists');
     }
 
@@ -40,6 +49,14 @@ export class AuthService {
       },
     });
 
+    // Log successful registration
+    await this.auditService.create({
+      userId: user.id,
+      userEmail: user.email,
+      action: 'auth:register',
+      result: 'success',
+    });
+
     return this.generateTokenResponse(user);
   }
 
@@ -52,6 +69,13 @@ export class AuthService {
     });
 
     if (!user || !user.password) {
+      // Log failed login attempt - user not found
+      await this.auditService.create({
+        userEmail: email,
+        action: 'auth:login',
+        result: 'failure',
+        reason: 'Invalid credentials - user not found',
+      });
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -59,13 +83,37 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
+      // Log failed login attempt - wrong password
+      await this.auditService.create({
+        userId: user.id,
+        userEmail: email,
+        action: 'auth:login',
+        result: 'failure',
+        reason: 'Invalid credentials - wrong password',
+      });
       throw new UnauthorizedException('Invalid credentials');
     }
 
     // Check if user is active
     if (!user.isActive) {
+      // Log failed login attempt - user deactivated
+      await this.auditService.create({
+        userId: user.id,
+        userEmail: email,
+        action: 'auth:login',
+        result: 'failure',
+        reason: 'User account is deactivated',
+      });
       throw new UnauthorizedException('User account is deactivated');
     }
+
+    // Log successful login
+    await this.auditService.create({
+      userId: user.id,
+      userEmail: user.email,
+      action: 'auth:login',
+      result: 'success',
+    });
 
     return this.generateTokenResponse(user);
   }

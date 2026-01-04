@@ -18,14 +18,17 @@ const core_1 = require("@nestjs/core");
 const permissions_decorator_1 = require("../decorators/permissions.decorator");
 const roles_service_1 = require("../../roles/roles.service");
 const policies_service_1 = require("../../policies/policies.service");
+const audit_service_1 = require("../../audit/audit.service");
 let PermissionsGuard = class PermissionsGuard {
     reflector;
     rolesService;
     policiesService;
-    constructor(reflector, rolesService, policiesService) {
+    auditService;
+    constructor(reflector, rolesService, policiesService, auditService) {
         this.reflector = reflector;
         this.rolesService = rolesService;
         this.policiesService = policiesService;
+        this.auditService = auditService;
     }
     async canActivate(context) {
         const requiredPermissions = this.reflector.getAllAndOverride(permissions_decorator_1.PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);
@@ -41,6 +44,24 @@ let PermissionsGuard = class PermissionsGuard {
         const userPermissions = await this.rolesService.getUserPermissions(user.id, organizationId);
         const hasPermission = requiredPermissions.every((permission) => userPermissions.includes(permission));
         if (!hasPermission) {
+            if (this.auditService) {
+                await this.auditService.create({
+                    userId: user.id,
+                    userEmail: user.email,
+                    organizationId,
+                    action: 'access:denied',
+                    resourceType: 'permission',
+                    resourceId: request.params?.id,
+                    result: 'failure',
+                    reason: `Missing required permissions: ${requiredPermissions.join(', ')}`,
+                    metadata: {
+                        method: request.method,
+                        path: request.path,
+                        requiredPermissions,
+                        userPermissions,
+                    },
+                });
+            }
             throw new common_1.ForbiddenException(`Missing required permissions: ${requiredPermissions.join(', ')}`);
         }
         if (this.policiesService && organizationId) {
@@ -51,6 +72,25 @@ let PermissionsGuard = class PermissionsGuard {
                     const reason = result.matchedPolicy
                         ? `Policy '${result.matchedPolicy.name}' denied access: ${result.reason}`
                         : result.reason;
+                    if (this.auditService) {
+                        await this.auditService.create({
+                            userId: user.id,
+                            userEmail: user.email,
+                            organizationId,
+                            action: 'policy:deny',
+                            resourceType: 'policy',
+                            resourceId: result.matchedPolicy?.id,
+                            result: 'failure',
+                            reason: `Access denied by policy: ${reason}`,
+                            metadata: {
+                                method: request.method,
+                                path: request.path,
+                                permission,
+                                policyName: result.matchedPolicy?.name,
+                                policyEffect: result.matchedPolicy?.effect,
+                            },
+                        });
+                    }
                     throw new common_1.ForbiddenException(`Access denied by policy: ${reason}`);
                 }
             }
@@ -83,8 +123,11 @@ exports.PermissionsGuard = PermissionsGuard = __decorate([
     (0, common_1.Injectable)(),
     __param(2, (0, common_1.Optional)()),
     __param(2, (0, common_1.Inject)(policies_service_1.PoliciesService)),
+    __param(3, (0, common_1.Optional)()),
+    __param(3, (0, common_1.Inject)(audit_service_1.AuditService)),
     __metadata("design:paramtypes", [core_1.Reflector,
         roles_service_1.RolesService,
-        policies_service_1.PoliciesService])
+        policies_service_1.PoliciesService,
+        audit_service_1.AuditService])
 ], PermissionsGuard);
 //# sourceMappingURL=permissions.guard.js.map

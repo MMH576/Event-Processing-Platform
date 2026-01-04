@@ -10,8 +10,8 @@ export declare class OrganizationsController {
     }): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
         slug: string;
         settings: import("@prisma/client/runtime/client").JsonValue;
     }>;
@@ -23,81 +23,81 @@ export declare class OrganizationsController {
         joinedAt: Date;
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
         slug: string;
         settings: import("@prisma/client/runtime/client").JsonValue;
     }[]>;
     findOne(id: string): Promise<{
-        members: ({
-            user: {
-                email: string;
-                fullName: string | null;
-                id: string;
-            };
-        } & {
-            id: string;
-            organizationId: string;
-            userId: string;
-            joinedAt: Date;
-        })[];
         _count: {
             roles: number;
             members: number;
         };
+        members: ({
+            user: {
+                id: string;
+                email: string;
+                fullName: string | null;
+            };
+        } & {
+            userId: string;
+            organizationId: string;
+            id: string;
+            joinedAt: Date;
+        })[];
     } & {
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
         slug: string;
         settings: import("@prisma/client/runtime/client").JsonValue;
     }>;
     update(id: string, updateOrganizationDto: UpdateOrganizationDto): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
         slug: string;
         settings: import("@prisma/client/runtime/client").JsonValue;
     }>;
     remove(id: string): Promise<{
         id: string;
         createdAt: Date;
-        updatedAt: Date;
         name: string;
+        updatedAt: Date;
         slug: string;
         settings: import("@prisma/client/runtime/client").JsonValue;
     }>;
     addMember(id: string, addMemberDto: AddMemberDto): Promise<{
         user: {
+            id: string;
             email: string;
             fullName: string | null;
-            id: string;
         };
     } & {
-        id: string;
-        organizationId: string;
         userId: string;
+        organizationId: string;
+        id: string;
         joinedAt: Date;
     }>;
     getMembers(id: string): Promise<({
         user: {
+            id: string;
             email: string;
             fullName: string | null;
-            id: string;
             isActive: boolean;
         };
     } & {
-        id: string;
-        organizationId: string;
         userId: string;
+        organizationId: string;
+        id: string;
         joinedAt: Date;
     })[]>;
     removeMember(id: string, userId: string): Promise<{
-        id: string;
-        organizationId: string;
         userId: string;
+        organizationId: string;
+        id: string;
         joinedAt: Date;
     }>;
 }
