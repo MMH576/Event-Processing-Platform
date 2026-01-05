@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Control System</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --border: #e2e8f0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Modal/Popup Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: scale(0.9);
+      transition: transform 0.3s;
+    }
+
+    .modal-overlay.active .modal {
+      transform: scale(1);
+    }
+
+    .modal h2 {
+      font-size: 24px;
+      margin-bottom: 16px;
+      color: var(--primary);
+    }
+
+    .modal p {
+      margin-bottom: 16px;
+      color: var(--text-light);
+    }
+
+    .feature-list {
+      list-style: none;
+      margin: 20px 0;
+    }
+
+    .feature-list li {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .feature-list li:last-child {
+      border-bottom: none;
+    }
+
+    .feature-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .feature-text h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .feature-text p {
+      font-size: 13px;
+      margin: 0;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: #cbd5e1;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    /* Header */
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--bg);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+    }
+
+    /* Main Layout */
+    .container {
+      display: flex;
+      min-height: calc(100vh - 65px);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+    }
+
+    .nav-section {
+      margin-bottom: 24px;
+    }
+
+    .nav-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-light);
+      padding: 0 24px;
+      margin-bottom: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: var(--bg);
+      color: var(--primary);
+    }
+
+    .nav-item.active {
+      border-right: 3px solid var(--primary);
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .page-header {
+      margin-bottom: 24px;
+    }
+
+    .page-header h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .page-header p {
+      color: var(--text-light);
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text-light);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    tr:hover {
+      background: var(--bg);
+    }
+
+    /* Status Badges */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .badge-error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge-info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    /* Response Panel */
+    .response-panel {
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .response-panel.active {
+      display: block;
+    }
+
+    .response-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .response-status {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .response-status.success {
+      color: var(--success);
+    }
+
+    .response-status.error {
+      color: var(--error);
+    }
+
+    .response-meta {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .response-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .response-method {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .response-method.GET { background: #3b82f6; color: white; }
+    .response-method.POST { background: #10b981; color: white; }
+    .response-method.PATCH { background: #f59e0b; color: white; }
+    .response-method.PUT { background: #8b5cf6; color: white; }
+    .response-method.DELETE { background: #ef4444; color: white; }
+
+    .response-endpoint {
+      font-family: 'Monaco', 'Menlo', monospace;
+      color: #cbd5e1;
+    }
+
+    .response-status-code {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    .response-status-code.success { background: #065f46; color: #d1fae5; }
+    .response-status-code.error { background: #991b1b; color: #fee2e2; }
+
+    .response-section {
+      margin-bottom: 16px;
+    }
+
+    .response-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .response-section-title::before {
+      content: '';
+      display: block;
+      width: 3px;
+      height: 12px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .response-body {
+      background: #0f172a;
+      border-radius: 6px;
+      padding: 12px;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 13px;
+      color: #e2e8f0;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .response-body.request {
+      background: #1e3a5f;
+      border: 1px solid #2563eb;
+    }
+
+    .response-message {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .response-message.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .response-message.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .response-message-icon {
+      font-size: 20px;
+    }
+
+    .response-message-text h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .response-message-text p {
+      font-size: 13px;
+      margin: 0;
+    }
+
+    .response-toggle {
+      background: transparent;
+      border: 1px solid #475569;
+      color: #94a3b8;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .response-toggle:hover {
+      background: #334155;
+      color: #e2e8f0;
+    }
+
+    /* Health Status */
+    .health-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .health-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .health-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin: 0 auto 12px;
+    }
+
+    .health-icon.up {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .health-icon.down {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .health-card h3 {
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .health-card p {
+      font-size: 13px;
+      color: var(--text-light);
+    }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-light);
+      margin-top: 4px;
+    }
+
+    /* Loading */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 48px;
+      color: var(--text-light);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-light);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab:hover {
+      color: var(--text);
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    /* Help Button */
+    .help-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+      transition: all 0.2s;
+    }
+
+    .help-btn:hover {
+      transform: scale(1.1);
+      background: var(--primary-dark);
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 1001;
+    }
+
+    .toast {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.3s ease;
+      min-width: 300px;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--success);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--error);
+    }
+
+    .toast-icon {
+      font-size: 20px;
+    }
+
+    .toast.success .toast-icon {
+      color: var(--success);
+    }
+
+    .toast.error .toast-icon {
+      color: var(--error);
+    }
+
+    .toast-content h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .toast-content p {
+      font-size: 13px;
+      color: var(--text-light);
+      margin: 0;
+    }
+
+    /* Hide sections */
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Welcome Modal -->
+  <div class="modal-overlay active" id="welcomeModal">
+    <div class="modal">
+      <h2>Welcome to Access Control System</h2>
+      <p>This is a production-grade authorization system that helps you manage who can do what in your application.</p>
+
+      <ul class="feature-list">
+        <li>
+          <div class="feature-icon">1</div>
+          <div class="feature-text">
+            <h4>Create an Account</h4>
+            <p>Start by registering a new user account. This will give you access to all features.</p>
+          </div>
+        </li>
+        <li>
+          <div class="feature-icon">2</div>
+          <div class="feature-text">
+            <h4>Create Permissions</h4>
+            <p>Define what actions can be performed (e.g., "invoice:read", "user:delete").</p>
+          </div>
+        </li>
+        <li>
+          <div class="feature-icon">3</div>
+          <div class="feature-text">
+            <h4>Create Roles</h4>
+            <p>Group permissions into roles like "Admin", "Manager", or "Viewer".</p>
+          </div>
+        </li>
+        <li>
+          <div class="feature-icon">4</div>
+          <div class="feature-text">
+            <h4>Assign Roles to Users</h4>
+            <p>Give users roles to grant them the permissions they need.</p>
+          </div>
+        </li>
+        <li>
+          <div class="feature-icon">5</div>
+          <div class="feature-text">
+            <h4>Create Policies (Advanced)</h4>
+            <p>Add context-aware rules like "Approve invoices only under $10,000".</p>
+          </div>
+        </li>
+      </ul>
+
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="closeWelcome()">Get Started</button>
+        <button class="btn btn-secondary" onclick="closeWelcome(); showSection('health');">Check System Health</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Modal -->
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal">
+      <h2>How to Use This System</h2>
+      <p>Quick reference guide for the Access Control System.</p>
+
+      <ul class="feature-list">
+        <li>
+          <div class="feature-icon">?</div>
+          <div class="feature-text">
+            <h4>Authentication</h4>
+            <p>Register or login first. Your session token is stored automatically.</p>
+          </div>
+        </li>
+        <li>
+          <div class="feature-icon">P</div>
+          <div class="feature-text">
+            <h4>Permissions</h4>
+            <p>Format: "resource:action" (e.g., "invoice:read", "user:create"). These are the building blocks.</p>
+          </div>
+        </li>
+        <li>
+          <div class="feature-icon">R</div>
+          <div class="feature-text">
+            <h4>Roles</h4>
+            <p>Collections of permissions. Assign multiple permissions to a role, then assign roles to users.</p>
+          </div>
+        </li>
+        <li>
+          <div class="feature-icon">O</div>
+          <div class="feature-text">
+            <h4>Organizations</h4>
+            <p>Multi-tenant support. Users can belong to different organizations with different roles in each.</p>
+          </div>
+        </li>
+        <li>
+          <div class="feature-icon">A</div>
+          <div class="feature-text">
+            <h4>Audit Logs</h4>
+            <p>Every action is logged. View who did what and when.</p>
+          </div>
+        </li>
+      </ul>
+
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="closeHelp()">Got it!</button>
+        <a href="/api/docs" target="_blank" class="btn btn-secondary">View API Docs</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="logo">Access Control System</div>
+    <div class="header-actions">
+      <div class="user-info" id="userInfo" style="display: none;">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <span id="userName">User</span>
+        <button class="btn btn-secondary" onclick="logout()" style="padding: 6px 12px; font-size: 12px;">Logout</button>
+      </div>
+      <a href="/api/docs" target="_blank" class="btn btn-secondary">API Docs</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="nav-section">
+        <div class="nav-section-title">Getting Started</div>
+        <div class="nav-item active" onclick="showSection('auth')">
+          <span>1. Authentication</span>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Access Control</div>
+        <div class="nav-item" onclick="showSection('permissions')">
+          <span>2. Permissions</span>
+        </div>
+        <div class="nav-item" onclick="showSection('roles')">
+          <span>3. Roles</span>
+        </div>
+        <div class="nav-item" onclick="showSection('organizations')">
+          <span>4. Organizations</span>
+        </div>
+        <div class="nav-item" onclick="showSection('policies')">
+          <span>5. Policies</span>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Monitoring</div>
+        <div class="nav-item" onclick="showSection('audit')">
+          <span>Audit Logs</span>
+        </div>
+        <div class="nav-item" onclick="showSection('health')">
+          <span>System Health</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Auth Section -->
+      <div class="section active" id="section-auth">
+        <div class="page-header">
+          <h1>Authentication</h1>
+          <p>Create an account or login to access the system. All other features require authentication.</p>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" onclick="showAuthTab('register')">Register</div>
+          <div class="tab" onclick="showAuthTab('login')">Login</div>
+        </div>
+
+        <div id="auth-register" class="card">
+          <div class="card-header">
+            <div class="card-title">Create New Account</div>
+          </div>
+          <form onsubmit="register(event)">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="registerName" placeholder="John Doe" required>
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="registerEmail" placeholder="john@example.com" required>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="registerPassword" placeholder="Minimum 6 characters" required minlength="6">
+            </div>
+            <button type="submit" class="btn btn-primary" id="registerBtn">Create Account</button>
+          </form>
+          <div class="response-panel" id="registerResponse"></div>
+        </div>
+
+        <div id="auth-login" class="card" style="display: none;">
+          <div class="card-header">
+            <div class="card-title">Login to Your Account</div>
+          </div>
+          <form onsubmit="login(event)">
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" id="loginEmail" placeholder="john@example.com" required>
+            </div>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" id="loginPassword" placeholder="Your password" required>
+            </div>
+            <button type="submit" class="btn btn-primary" id="loginBtn">Login</button>
+          </form>
+          <div class="response-panel" id="loginResponse"></div>
+        </div>
+      </div>
+
+      <!-- Permissions Section -->
+      <div class="section" id="section-permissions">
+        <div class="page-header">
+          <h1>Permissions</h1>
+          <p>Permissions define what actions can be performed on resources. Format: "resource:action"</p>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Create New Permission</div>
+          </div>
+          <form onsubmit="createPermission(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Resource (e.g., invoice, user, report)</label>
+                <input type="text" id="permResource" placeholder="invoice" required>
+              </div>
+              <div class="form-group">
+                <label>Action (e.g., read, create, delete)</label>
+                <input type="text" id="permAction" placeholder="read" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Description (optional)</label>
+              <input type="text" id="permDescription" placeholder="Ability to read invoices">
+            </div>
+            <button type="submit" class="btn btn-primary">Create Permission</button>
+          </form>
+          <div class="response-panel" id="permissionResponse"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">All Permissions</div>
+            <button class="btn btn-secondary" onclick="loadPermissions()">Refresh</button>
+          </div>
+          <div id="permissionsList">
+            <div class="empty-state">
+              <div class="empty-state-icon">-</div>
+              <p>No permissions yet. Create one above!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Roles Section -->
+      <div class="section" id="section-roles">
+        <div class="page-header">
+          <h1>Roles</h1>
+          <p>Roles group permissions together. Assign roles to users to grant them access.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Create New Role</div>
+          </div>
+          <form onsubmit="createRole(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Role Name</label>
+                <input type="text" id="roleName" placeholder="Admin" required>
+              </div>
+              <div class="form-group">
+                <label>Organization ID (optional)</label>
+                <input type="text" id="roleOrgId" placeholder="Leave empty for global role">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Description (optional)</label>
+              <input type="text" id="roleDescription" placeholder="Full system administrator">
+            </div>
+            <button type="submit" class="btn btn-primary">Create Role</button>
+          </form>
+          <div class="response-panel" id="roleResponse"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">All Roles</div>
+            <button class="btn btn-secondary" onclick="loadRoles()">Refresh</button>
+          </div>
+          <div id="rolesList">
+            <div class="empty-state">
+              <div class="empty-state-icon">-</div>
+              <p>No roles yet. Create one above!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Organizations Section -->
+      <div class="section" id="section-organizations">
+        <div class="page-header">
+          <h1>Organizations</h1>
+          <p>Organizations enable multi-tenant access control. Users can have different roles in different organizations.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Create New Organization</div>
+          </div>
+          <form onsubmit="createOrganization(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Organization Name</label>
+                <input type="text" id="orgName" placeholder="Acme Corp" required>
+              </div>
+              <div class="form-group">
+                <label>Slug (URL-friendly name)</label>
+                <input type="text" id="orgSlug" placeholder="acme-corp" required>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Organization</button>
+          </form>
+          <div class="response-panel" id="orgResponse"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Your Organizations</div>
+            <button class="btn btn-secondary" onclick="loadOrganizations()">Refresh</button>
+          </div>
+          <div id="orgsList">
+            <div class="empty-state">
+              <div class="empty-state-icon">-</div>
+              <p>No organizations yet. Create one above!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Policies Section -->
+      <div class="section" id="section-policies">
+        <div class="page-header">
+          <h1>Policies (ABAC)</h1>
+          <p>Policies add context-aware rules. Example: "Allow invoice approval only if amount is under $10,000".</p>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Create New Policy</div>
+          </div>
+          <form onsubmit="createPolicy(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Policy Name</label>
+                <input type="text" id="policyName" placeholder="High Value Approval Limit" required>
+              </div>
+              <div class="form-group">
+                <label>Effect</label>
+                <select id="policyEffect" required>
+                  <option value="allow">Allow</option>
+                  <option value="deny">Deny</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Organization ID</label>
+                <input type="text" id="policyOrgId" placeholder="Required" required>
+              </div>
+              <div class="form-group">
+                <label>Permission ID</label>
+                <input type="text" id="policyPermId" placeholder="Required" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Conditions (JSON)</label>
+              <textarea id="policyConditions" rows="3" placeholder='{"amountLimit": 10000}'></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Policy</button>
+          </form>
+          <div class="response-panel" id="policyResponse"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">All Policies</div>
+            <button class="btn btn-secondary" onclick="loadPolicies()">Refresh</button>
+          </div>
+          <div id="policiesList">
+            <div class="empty-state">
+              <div class="empty-state-icon">-</div>
+              <p>No policies yet. Create one above!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit Section -->
+      <div class="section" id="section-audit">
+        <div class="page-header">
+          <h1>Audit Logs</h1>
+          <p>Every action in the system is logged. See who did what and when.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Recent Activity</div>
+            <button class="btn btn-secondary" onclick="loadAuditLogs()">Refresh</button>
+          </div>
+          <div id="auditList">
+            <div class="empty-state">
+              <div class="empty-state-icon">-</div>
+              <p>No audit logs yet. Start using the system to generate logs!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Health Section -->
+      <div class="section" id="section-health">
+        <div class="page-header">
+          <h1>System Health</h1>
+          <p>Real-time status of all system components.</p>
+        </div>
+
+        <div class="health-grid" id="healthGrid">
+          <div class="health-card">
+            <div class="health-icon"><span class="loading"></span></div>
+            <h3>Loading...</h3>
+            <p>Checking status</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 24px;">
+          <div class="card-header">
+            <div class="card-title">Raw Health Response</div>
+            <button class="btn btn-secondary" onclick="checkHealth()">Refresh</button>
+          </div>
+          <div class="response-panel active" id="healthResponse">
+            <div class="response-body">Loading...</div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Help Button -->
+  <button class="help-btn" onclick="showHelp()">?</button>
+
+  <script>
+    // State
+    let token = localStorage.getItem('token');
+    let currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      if (token && currentUser) {
+        updateUserUI();
+        // Don't show welcome if already logged in
+        if (!localStorage.getItem('welcomeSeen')) {
+          document.getElementById('welcomeModal').classList.add('active');
+        }
+      }
+      checkHealth();
+    });
+
+    // Modal functions
+    function closeWelcome() {
+      document.getElementById('welcomeModal').classList.remove('active');
+      localStorage.setItem('welcomeSeen', 'true');
+    }
+
+    function showHelp() {
+      document.getElementById('helpModal').classList.add('active');
+    }
+
+    function closeHelp() {
+      document.getElementById('helpModal').classList.remove('active');
+    }
+
+    // Navigation
+    function showSection(section) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+      document.getElementById('section-' + section).classList.add('active');
+      event.target.closest('.nav-item').classList.add('active');
+
+      // Load data for the section
+      if (section === 'permissions') loadPermissions();
+      if (section === 'roles') loadRoles();
+      if (section === 'organizations') loadOrganizations();
+      if (section === 'policies') loadPolicies();
+      if (section === 'audit') loadAuditLogs();
+      if (section === 'health') checkHealth();
+    }
+
+    function showAuthTab(tab) {
+      document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+
+      document.getElementById('auth-register').style.display = tab === 'register' ? 'block' : 'none';
+      document.getElementById('auth-login').style.display = tab === 'login' ? 'block' : 'none';
+    }
+
+    // Toast notifications
+    function showToast(title, message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast ' + type;
+      toast.innerHTML = `
+        <div class="toast-icon">${type === 'success' ? '✓' : '✕'}</div>
+        <div class="toast-content">
+          <h4>${title}</h4>
+          <p>${message}</p>
+        </div>
+      `;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // Response display - now shows both friendly message AND raw backend response
+    function showResponse(elementId, success, apiResult, friendlyMessage) {
+      const panel = document.getElementById(elementId);
+      panel.classList.add('active');
+
+      const { method, endpoint, status, requestBody, data, timestamp } = apiResult;
+
+      let html = '';
+
+      // Friendly message section
+      if (friendlyMessage) {
+        html += `
+          <div class="response-message ${success ? 'success' : 'error'}">
+            <div class="response-message-icon">${success ? '✓' : '✕'}</div>
+            <div class="response-message-text">
+              <h4>${success ? 'Success!' : 'Error'}</h4>
+              <p>${friendlyMessage}</p>
+            </div>
+          </div>
+        `;
+      }
+
+      // Request/Response header with method, endpoint, status
+      html += `
+        <div class="response-header">
+          <div class="response-meta">
+            <span class="response-method ${method}">${method}</span>
+            <span class="response-endpoint">${endpoint}</span>
+            <span class="response-status-code ${success ? 'success' : 'error'}">${status}</span>
+          </div>
+          <span style="color: #64748b; font-size: 11px;">${timestamp}</span>
+        </div>
+      `;
+
+      // Request body section (if there was one)
+      if (requestBody && Object.keys(requestBody).length > 0) {
+        html += `
+          <div class="response-section">
+            <div class="response-section-title">Request Body</div>
+            <div class="response-body request">${JSON.stringify(requestBody, null, 2)}</div>
+          </div>
+        `;
+      }
+
+      // Response body section
+      html += `
+        <div class="response-section">
+          <div class="response-section-title">Backend Response</div>
+          <div class="response-body">${JSON.stringify(data, null, 2)}</div>
+        </div>
+      `;
+
+      panel.innerHTML = html;
+    }
+
+    // API helper - now returns full request/response details
+    async function api(method, endpoint, body = null) {
+      const options = {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      };
+
+      if (token) {
+        options.headers['Authorization'] = 'Bearer ' + token;
+      }
+
+      if (body) {
+        options.body = JSON.stringify(body);
+      }
+
+      const timestamp = new Date().toLocaleTimeString();
+      const response = await fetch(endpoint, options);
+      const data = await response.json();
+
+      return {
+        ok: response.ok,
+        status: response.status,
+        data,
+        method,
+        endpoint,
+        requestBody: body,
+        timestamp
+      };
+    }
+
+    // Update UI
+    function updateUserUI() {
+      if (currentUser) {
+        document.getElementById('userInfo').style.display = 'flex';
+        document.getElementById('userName').textContent = currentUser.fullName || currentUser.email;
+        document.getElementById('userAvatar').textContent = (currentUser.fullName || currentUser.email)[0].toUpperCase();
+      } else {
+        document.getElementById('userInfo').style.display = 'none';
+      }
+    }
+
+    // Auth functions
+    async function register(e) {
+      e.preventDefault();
+      const btn = document.getElementById('registerBtn');
+      btn.innerHTML = '<span class="loading"></span>';
+      btn.disabled = true;
+
+      try {
+        const result = await api('POST', '/auth/register', {
+          email: document.getElementById('registerEmail').value,
+          password: document.getElementById('registerPassword').value,
+          fullName: document.getElementById('registerName').value,
+        });
+
+        if (result.ok) {
+          token = result.data.access_token;
+          currentUser = result.data.user;
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(currentUser));
+          updateUserUI();
+          showResponse('registerResponse', true, result,
+            `Welcome, ${currentUser.fullName}! Your account has been created successfully.`);
+          showToast('Account Created', 'You are now logged in!', 'success');
+        } else {
+          showResponse('registerResponse', false, result,
+            result.data.message || 'Registration failed. Please try again.');
+          showToast('Registration Failed', result.data.message || 'Please check your input', 'error');
+        }
+      } catch (err) {
+        showResponse('registerResponse', false, {
+          method: 'POST', endpoint: '/auth/register', status: 0,
+          data: { error: err.message }, requestBody: null, timestamp: new Date().toLocaleTimeString()
+        }, 'Network error. Please check your connection.');
+        showToast('Error', 'Could not connect to server', 'error');
+      }
+
+      btn.innerHTML = 'Create Account';
+      btn.disabled = false;
+    }
+
+    async function login(e) {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      btn.innerHTML = '<span class="loading"></span>';
+      btn.disabled = true;
+
+      try {
+        const result = await api('POST', '/auth/login', {
+          email: document.getElementById('loginEmail').value,
+          password: document.getElementById('loginPassword').value,
+        });
+
+        if (result.ok) {
+          token = result.data.access_token;
+          currentUser = result.data.user;
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(currentUser));
+          updateUserUI();
+          showResponse('loginResponse', true, result,
+            `Welcome back, ${currentUser.fullName}!`);
+          showToast('Login Successful', 'Welcome back!', 'success');
+        } else {
+          showResponse('loginResponse', false, result,
+            result.data.message || 'Invalid email or password.');
+          showToast('Login Failed', 'Please check your credentials', 'error');
+        }
+      } catch (err) {
+        showResponse('loginResponse', false, {
+          method: 'POST', endpoint: '/auth/login', status: 0,
+          data: { error: err.message }, requestBody: null, timestamp: new Date().toLocaleTimeString()
+        }, 'Network error. Please check your connection.');
+        showToast('Error', 'Could not connect to server', 'error');
+      }
+
+      btn.innerHTML = 'Login';
+      btn.disabled = false;
+    }
+
+    function logout() {
+      token = null;
+      currentUser = null;
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      updateUserUI();
+      showToast('Logged Out', 'See you next time!', 'success');
+      showSection('auth');
+    }
+
+    // Permissions
+    async function createPermission(e) {
+      e.preventDefault();
+      if (!token) {
+        showToast('Not Logged In', 'Please login first', 'error');
+        return;
+      }
+
+      const result = await api('POST', '/permissions', {
+        resource: document.getElementById('permResource').value,
+        action: document.getElementById('permAction').value,
+        description: document.getElementById('permDescription').value || undefined,
+      });
+
+      if (result.ok) {
+        showResponse('permissionResponse', true, result,
+          `Permission "${result.data.resource}:${result.data.action}" created successfully!`);
+        showToast('Permission Created', `${result.data.resource}:${result.data.action}`, 'success');
+        loadPermissions();
+        e.target.reset();
+      } else {
+        showResponse('permissionResponse', false, result,
+          result.data.message || 'Failed to create permission.');
+        showToast('Error', result.data.message || 'Creation failed', 'error');
+      }
+    }
+
+    async function loadPermissions() {
+      if (!token) {
+        document.getElementById('permissionsList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🔒</div>
+            <p>Please login to view permissions</p>
+          </div>
+        `;
+        return;
+      }
+
+      const result = await api('GET', '/permissions');
+
+      if (result.ok && result.data.length > 0) {
+        document.getElementById('permissionsList').innerHTML = `
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Permission</th>
+                  <th>Description</th>
+                  <th>ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${result.data.map(p => `
+                  <tr>
+                    <td><span class="badge badge-info">${p.resource}:${p.action}</span></td>
+                    <td>${p.description || '-'}</td>
+                    <td style="font-family: monospace; font-size: 12px;">${p.id}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else {
+        document.getElementById('permissionsList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">-</div>
+            <p>No permissions yet. Create one above!</p>
+          </div>
+        `;
+      }
+    }
+
+    // Roles
+    async function createRole(e) {
+      e.preventDefault();
+      if (!token) {
+        showToast('Not Logged In', 'Please login first', 'error');
+        return;
+      }
+
+      const body = {
+        name: document.getElementById('roleName').value,
+        description: document.getElementById('roleDescription').value || undefined,
+      };
+
+      const orgId = document.getElementById('roleOrgId').value;
+      if (orgId) body.organizationId = orgId;
+
+      const result = await api('POST', '/roles', body);
+
+      if (result.ok) {
+        showResponse('roleResponse', true, result,
+          `Role "${result.data.name}" created successfully!`);
+        showToast('Role Created', result.data.name, 'success');
+        loadRoles();
+        e.target.reset();
+      } else {
+        showResponse('roleResponse', false, result,
+          result.data.message || 'Failed to create role.');
+        showToast('Error', result.data.message || 'Creation failed', 'error');
+      }
+    }
+
+    async function loadRoles() {
+      if (!token) {
+        document.getElementById('rolesList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🔒</div>
+            <p>Please login to view roles</p>
+          </div>
+        `;
+        return;
+      }
+
+      const result = await api('GET', '/roles');
+
+      if (result.ok && result.data.length > 0) {
+        document.getElementById('rolesList').innerHTML = `
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Role Name</th>
+                  <th>Description</th>
+                  <th>Permissions</th>
+                  <th>ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${result.data.map(r => `
+                  <tr>
+                    <td><strong>${r.name}</strong></td>
+                    <td>${r.description || '-'}</td>
+                    <td>${r.permissions?.length || 0} assigned</td>
+                    <td style="font-family: monospace; font-size: 12px;">${r.id}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else {
+        document.getElementById('rolesList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">-</div>
+            <p>No roles yet. Create one above!</p>
+          </div>
+        `;
+      }
+    }
+
+    // Organizations
+    async function createOrganization(e) {
+      e.preventDefault();
+      if (!token) {
+        showToast('Not Logged In', 'Please login first', 'error');
+        return;
+      }
+
+      const result = await api('POST', '/organizations', {
+        name: document.getElementById('orgName').value,
+        slug: document.getElementById('orgSlug').value,
+      });
+
+      if (result.ok) {
+        showResponse('orgResponse', true, result,
+          `Organization "${result.data.name}" created! You are now the owner.`);
+        showToast('Organization Created', result.data.name, 'success');
+        loadOrganizations();
+        e.target.reset();
+      } else {
+        showResponse('orgResponse', false, result,
+          result.data.message || 'Failed to create organization.');
+        showToast('Error', result.data.message || 'Creation failed', 'error');
+      }
+    }
+
+    async function loadOrganizations() {
+      if (!token) {
+        document.getElementById('orgsList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🔒</div>
+            <p>Please login to view organizations</p>
+          </div>
+        `;
+        return;
+      }
+
+      const result = await api('GET', '/organizations');
+
+      if (result.ok && result.data.length > 0) {
+        document.getElementById('orgsList').innerHTML = `
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Organization</th>
+                  <th>Slug</th>
+                  <th>ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${result.data.map(o => `
+                  <tr>
+                    <td><strong>${o.name}</strong></td>
+                    <td>${o.slug}</td>
+                    <td style="font-family: monospace; font-size: 12px;">${o.id}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else {
+        document.getElementById('orgsList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">-</div>
+            <p>No organizations yet. Create one above!</p>
+          </div>
+        `;
+      }
+    }
+
+    // Policies
+    async function createPolicy(e) {
+      e.preventDefault();
+      if (!token) {
+        showToast('Not Logged In', 'Please login first', 'error');
+        return;
+      }
+
+      let conditions = {};
+      try {
+        const condText = document.getElementById('policyConditions').value;
+        if (condText) conditions = JSON.parse(condText);
+      } catch (err) {
+        showToast('Invalid JSON', 'Conditions must be valid JSON', 'error');
+        return;
+      }
+
+      const result = await api('POST', '/policies', {
+        name: document.getElementById('policyName').value,
+        effect: document.getElementById('policyEffect').value,
+        organizationId: document.getElementById('policyOrgId').value,
+        permissionId: document.getElementById('policyPermId').value,
+        conditions: conditions,
+      });
+
+      if (result.ok) {
+        showResponse('policyResponse', true, result,
+          `Policy "${result.data.name}" created with effect "${result.data.effect}"!`);
+        showToast('Policy Created', result.data.name, 'success');
+        loadPolicies();
+        e.target.reset();
+      } else {
+        showResponse('policyResponse', false, result,
+          result.data.message || 'Failed to create policy.');
+        showToast('Error', result.data.message || 'Creation failed', 'error');
+      }
+    }
+
+    async function loadPolicies() {
+      if (!token) {
+        document.getElementById('policiesList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🔒</div>
+            <p>Please login to view policies</p>
+          </div>
+        `;
+        return;
+      }
+
+      const result = await api('GET', '/policies');
+
+      if (result.ok && result.data.length > 0) {
+        document.getElementById('policiesList').innerHTML = `
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Policy Name</th>
+                  <th>Effect</th>
+                  <th>Conditions</th>
+                  <th>Active</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${result.data.map(p => `
+                  <tr>
+                    <td><strong>${p.name}</strong></td>
+                    <td><span class="badge ${p.effect === 'allow' ? 'badge-success' : 'badge-error'}">${p.effect}</span></td>
+                    <td style="font-family: monospace; font-size: 12px;">${JSON.stringify(p.conditions || {})}</td>
+                    <td><span class="badge ${p.isActive ? 'badge-success' : 'badge-warning'}">${p.isActive ? 'Yes' : 'No'}</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else {
+        document.getElementById('policiesList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">-</div>
+            <p>No policies yet. Create one above!</p>
+          </div>
+        `;
+      }
+    }
+
+    // Audit Logs
+    async function loadAuditLogs() {
+      if (!token) {
+        document.getElementById('auditList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">🔒</div>
+            <p>Please login to view audit logs</p>
+          </div>
+        `;
+        return;
+      }
+
+      const result = await api('GET', '/audit?limit=20');
+
+      if (result.ok && result.data.length > 0) {
+        document.getElementById('auditList').innerHTML = `
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Action</th>
+                  <th>Result</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${result.data.map(log => `
+                  <tr>
+                    <td>${new Date(log.createdAt).toLocaleString()}</td>
+                    <td><span class="badge badge-info">${log.action}</span></td>
+                    <td><span class="badge ${log.result === 'success' ? 'badge-success' : 'badge-error'}">${log.result}</span></td>
+                    <td>${log.reason || '-'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else {
+        document.getElementById('auditList').innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">-</div>
+            <p>No audit logs yet. Start using the system!</p>
+          </div>
+        `;
+      }
+    }
+
+    // Health Check
+    async function checkHealth() {
+      try {
+        const response = await fetch('/health');
+        const data = await response.json();
+
+        const grid = document.getElementById('healthGrid');
+        grid.innerHTML = `
+          <div class="health-card">
+            <div class="health-icon ${data.status === 'ok' ? 'up' : 'down'}">
+              ${data.status === 'ok' ? '✓' : '✕'}
+            </div>
+            <h3>Overall Status</h3>
+            <p>${data.status === 'ok' ? 'All systems operational' : 'Some issues detected'}</p>
+          </div>
+          <div class="health-card">
+            <div class="health-icon ${data.info?.database?.status === 'up' ? 'up' : 'down'}">
+              ${data.info?.database?.status === 'up' ? '✓' : '✕'}
+            </div>
+            <h3>Database</h3>
+            <p>${data.info?.database?.message || 'Unknown'}</p>
+          </div>
+          <div class="health-card">
+            <div class="health-icon ${data.info?.redis?.status === 'up' ? 'up' : 'down'}">
+              ${data.info?.redis?.status === 'up' ? '✓' : '✕'}
+            </div>
+            <h3>Redis Cache</h3>
+            <p>${data.info?.redis?.message || 'Unknown'}</p>
+          </div>
+        `;
+
+        document.querySelector('#healthResponse .response-body').textContent =
+          JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('healthGrid').innerHTML = `
+          <div class="health-card">
+            <div class="health-icon down">✕</div>
+            <h3>Connection Error</h3>
+            <p>Could not reach the server</p>
+          </div>
+        `;
+        document.querySelector('#healthResponse .response-body').textContent =
+          JSON.stringify({ error: err.message }, null, 2);
+      }
+    }
+  </script>
+</body>
+</html>
