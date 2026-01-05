@@ -10,15 +10,23 @@ build/
 .env.local
 .env.*.local
 
-# IDE
+# IDE and Editor
 .idea/
 .vscode/
 *.swp
 *.swo
+*.sublime-*
+
+# Claude Code / AI tools
+.claude/
+
+# Documentation (added manually)
+README.md
 
 # OS files
 .DS_Store
 Thumbs.db
+nul
 
 # Logs
 logs/
