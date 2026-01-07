@@ -1,0 +1,23 @@
+services:
+  # API Server
+  - type: web
+    name: access-control-api
+    runtime: node
+    plan: free
+    rootDir: access-control-system
+    buildCommand: npm ci && npx prisma generate && npx prisma migrate deploy && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: REDIS_URL
+        sync: false
+      - key: PORT
+        value: 10000
