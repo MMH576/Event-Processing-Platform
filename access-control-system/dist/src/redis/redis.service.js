@@ -25,22 +25,41 @@ let RedisService = RedisService_1 = class RedisService {
         this.configService = configService;
     }
     onModuleInit() {
-        const host = this.configService.get('REDIS_HOST') || 'localhost';
-        const port = parseInt(this.configService.get('REDIS_PORT') || '6379');
-        this.client = new ioredis_1.default({
-            host,
-            port,
-            retryStrategy: (times) => {
-                if (times > 3) {
-                    this.logger.warn('Redis connection failed after 3 retries');
-                    return null;
-                }
-                return Math.min(times * 100, 3000);
-            },
-        });
-        this.client.on('connect', () => {
-            this.logger.log(`Connected to Redis at ${host}:${port}`);
-        });
+        const redisUrl = this.configService.get('REDIS_URL');
+        if (redisUrl) {
+            this.client = new ioredis_1.default(redisUrl, {
+                tls: redisUrl.startsWith('rediss://') ? {} : undefined,
+                retryStrategy: (times) => {
+                    if (times > 3) {
+                        this.logger.warn('Redis connection failed after 3 retries');
+                        return null;
+                    }
+                    return Math.min(times * 100, 3000);
+                },
+                maxRetriesPerRequest: null,
+            });
+            this.client.on('connect', () => {
+                this.logger.log('Connected to Redis via URL');
+            });
+        }
+        else {
+            const host = this.configService.get('REDIS_HOST') || 'localhost';
+            const port = parseInt(this.configService.get('REDIS_PORT') || '6379');
+            this.client = new ioredis_1.default({
+                host,
+                port,
+                retryStrategy: (times) => {
+                    if (times > 3) {
+                        this.logger.warn('Redis connection failed after 3 retries');
+                        return null;
+                    }
+                    return Math.min(times * 100, 3000);
+                },
+            });
+            this.client.on('connect', () => {
+                this.logger.log(`Connected to Redis at ${host}:${port}`);
+            });
+        }
         this.client.on('error', (err) => {
             this.logger.error('Redis connection error:', err.message);
         });

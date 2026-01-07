@@ -15,24 +15,47 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   constructor(private configService: ConfigService) {}
 
   onModuleInit() {
-    const host = this.configService.get('REDIS_HOST') || 'localhost';
-    const port = parseInt(this.configService.get('REDIS_PORT') || '6379');
+    // Support REDIS_URL (for Upstash/production) or REDIS_HOST/PORT (for local)
+    const redisUrl = this.configService.get('REDIS_URL');
 
-    this.client = new Redis({
-      host,
-      port,
-      retryStrategy: (times) => {
-        if (times > 3) {
-          this.logger.warn('Redis connection failed after 3 retries');
-          return null;
-        }
-        return Math.min(times * 100, 3000);
-      },
-    });
+    if (redisUrl) {
+      // Production: Use REDIS_URL (supports Upstash with TLS)
+      this.client = new Redis(redisUrl, {
+        tls: redisUrl.startsWith('rediss://') ? {} : undefined,
+        retryStrategy: (times) => {
+          if (times > 3) {
+            this.logger.warn('Redis connection failed after 3 retries');
+            return null;
+          }
+          return Math.min(times * 100, 3000);
+        },
+        maxRetriesPerRequest: null,
+      });
 
-    this.client.on('connect', () => {
-      this.logger.log(`Connected to Redis at ${host}:${port}`);
-    });
+      this.client.on('connect', () => {
+        this.logger.log('Connected to Redis via URL');
+      });
+    } else {
+      // Local development: Use REDIS_HOST and REDIS_PORT
+      const host = this.configService.get('REDIS_HOST') || 'localhost';
+      const port = parseInt(this.configService.get('REDIS_PORT') || '6379');
+
+      this.client = new Redis({
+        host,
+        port,
+        retryStrategy: (times) => {
+          if (times > 3) {
+            this.logger.warn('Redis connection failed after 3 retries');
+            return null;
+          }
+          return Math.min(times * 100, 3000);
+        },
+      });
+
+      this.client.on('connect', () => {
+        this.logger.log(`Connected to Redis at ${host}:${port}`);
+      });
+    }
 
     this.client.on('error', (err) => {
       this.logger.error('Redis connection error:', err.message);
