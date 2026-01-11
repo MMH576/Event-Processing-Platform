@@ -20,8 +20,8 @@ build/
 # Claude Code / AI tools
 .claude/
 
-# Documentation (added manually)
-README.md
+# Claude Code / AI docs
+# (README.md should be tracked)
 
 # OS files
 .DS_Store
