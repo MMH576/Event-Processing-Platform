@@ -7,9 +7,8 @@
 # Claude Code / AI tools
 .claude/
 
-# Project documentation (added manually)
-PROJECT_CONTEXT.md
-README.md
+# Project documentation (root level only)
+/PROJECT_CONTEXT.md
 
 # OS files
 .DS_Store
